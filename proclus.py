@@ -33,7 +33,14 @@ nlist = args.nlist
 dold = datasets[name]
 dnew = args.dnew
 
-PROCLUS = GPU_PROCLUS if args.device == "GPU" else PROCLUS_parallel
+if args.device == "GPU_KEEP":
+    PROCLUS = GPU_FAST_star_PROCLUS
+elif args.device == "GPU_SAVE":
+    PROCLUS = GPU_FAST_PROCLUS
+elif args.device == "GPU":
+    PROCLUS = GPU_PROCLUS
+elif args.device == "CPU":
+    PROCLUS = PROCLUS_parallel
 
 print(f"Running {name}: {dold} -> {dnew}")
 
