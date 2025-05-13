@@ -33,7 +33,7 @@ nlist = args.nlist
 dold = datasets[name]
 dnew = args.dnew
 
-PROCLUS = PROCLUS_parallel if args.device == "GPU" else PROCLUS_parallel
+PROCLUS = GPU_PROCLUS if args.device == "GPU" else PROCLUS_parallel
 
 print(f"Running {name}: {dold} -> {dnew}")
 
