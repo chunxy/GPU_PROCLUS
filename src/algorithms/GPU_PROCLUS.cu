@@ -613,7 +613,6 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
     gpu_assign_points_kernel << < number_of_blocks, block_n_k, min(n, remaining) * sizeof(float) >> > (
             d_Ds, d_D_sizes, d_C, d_C_sizes, d_data, d_M_current, n, k, d);
     gpuErrchk(cudaPeekAtLastError());
-    printf("Finished assigning points\n");
 
 /*
     dim3 block_k_n(k, min(n, remaining));
@@ -687,7 +686,6 @@ gpu_evaluate_cluster(float *d_cost, int *d_C, int *d_C_sizes, bool *d_D, int *d_
     gpu_evaluate_cluster_kernel << < grid, block >> > (d_cost, d_C, d_C_sizes, d_D, d_D_sizes, d_data,
             n, d, k);
     gpuErrchk(cudaPeekAtLastError());
-    printf("Finished evaluating cluster\n");
 }
 
 __global__
