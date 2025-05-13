@@ -243,7 +243,9 @@ gpu_find_dimensions_kernel_Z(float *__restrict__ d_Z, const float *__restrict__ 
     atomicAdd(&sigma_i, sub * sub);
     __syncthreads();
     if (threadIdx.x == 0) {//only one should do this
-        sigma_i /= (d - 1);
+        if (d > 1) {
+            sigma_i /= (d - 1);
+        }
         sigma_i = std::sqrt(sigma_i);
     }
     __syncthreads();
