@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import time
 import torch
+import traceback
 
 from python.GPU_PROCLUS import PROCLUS_parallel, GPU_PROCLUS, GPU_FAST_PROCLUS, GPU_FAST_star_PROCLUS
 
@@ -62,7 +63,16 @@ for k in ks:
     for l in ls:
         print("k:", k, "l:", l)
         t0 = time.time()
-        rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
+        try:
+            rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
+        except Exception as e:
+            print("\nFloating point exception occurred at:")
+            print("----------------------------------------")
+            for line in traceback.format_exc().split('\n'):
+                if 'GPU_PROCLUS.cu' in line:
+                    print(line)
+            print("----------------------------------------")
+            raise
         indices, subspaces, clustering = rs[0]
         indices.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
         subspaces.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
