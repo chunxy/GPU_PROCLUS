@@ -5,6 +5,8 @@ import torch
 
 from python.GPU_PROCLUS import PROCLUS_parallel, GPU_PROCLUS
 
+torch.cuda.synchronize()
+
 datasets = {
   "gist": 960,
   "crawl": 300,
