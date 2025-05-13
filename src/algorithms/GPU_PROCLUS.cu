@@ -9,7 +9,7 @@
 
 
 #define BLOCK_SIZE 1024
-#define BLOCK_SIZE_SMALL 128
+#define BLOCK_SIZE_SMALL 1024
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 
