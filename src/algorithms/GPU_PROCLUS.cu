@@ -519,7 +519,7 @@ gpu_assign_points_kernel(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes,
             dist += abs(d_data[p * d + j] - d_data[m_i * d + j]);
         }
 
-        if (size > 0) {
+        if (size != 0) {
             dist /= size;
         }
 
@@ -651,7 +651,9 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
             int p = d_C[i * n + l];
             tmp += d_data[p * d + j];
         }
-        atomicAdd(&tmp_mean, tmp / size);
+        if (size != 0) {
+            atomicAdd(&tmp_mean, tmp / size);
+        }
 
         tmp_cost = 0;
         __syncthreads();
@@ -661,7 +663,9 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
             tmp += abs(d_data[p * d + j] - tmp_mean);
         }
 
-        atomicAdd(&tmp_cost, tmp / tmp_2);
+        if (tmp_2 != 0) {
+            atomicAdd(&tmp_cost, tmp / tmp_2);
+        }
         __syncthreads();
         if (threadIdx.x == 0)
             atomicAdd(&d_cost[0], tmp_cost);
@@ -816,7 +820,9 @@ void remove_outliers_kernel_min_delta(float *d_delta, bool *d_D, int *d_M_best, 
                         size++;
                     }
                 }
-                msd /= size;
+                if (size != 0) {
+                    msd /= size;
+                }
 
                 atomicMin(&d_delta[i], msd);
             }
@@ -850,7 +856,9 @@ remove_outliers_kernel_remove(int *d_C_result, int *d_C_best, int *d_C_sizes_bes
                     size++;
                 }
             }
-            msd /= size;
+            if (size != 0) {
+                msd /= size;
+            }
 
             if (msd <= d_delta[l]) {
                 clustered = i;
@@ -1830,7 +1838,7 @@ gpu_find_dimensions_kernel_SAVE_X(float *__restrict__ d_X, float *__restrict__ d
     int m_idx = d_M_idx[i];
     int L_i_size = d_L_sizes[m_idx];
 
-    d_X[i * d + j] = L_i_size > 0 ? d_H[m_idx * d + j] / L_i_size : 0.;
+    d_X[i * d + j] = L_i_size != 0 ? d_H[m_idx * d + j] / L_i_size : 0.;
 }
 
 void gpu_find_dimensions_save(bool *d_D, float *d_Z, float *d_X, float *d_H,
