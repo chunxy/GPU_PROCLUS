@@ -307,7 +307,9 @@ float evaluate_cluster(at::Tensor data, bool **D, int *C, int n, int d, int k) {
 
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < d; j++) {
-            means[i][j] /= counts[i];
+            if (counts[i] != 0) {
+                means[i][j] /= counts[i];
+            }
         }
     }
 
@@ -321,7 +323,7 @@ float evaluate_cluster(at::Tensor data, bool **D, int *C, int n, int d, int k) {
     }
     for (int j = 0; j < d; j++) {
         for (int i = 0; i < k; i++) {
-            if (D[i][j]) {
+            if (D[i][j] && counts[i] != 0) {
                 Y[i][j] /= counts[i];
             }
         }
@@ -376,6 +378,7 @@ float evaluate_cluster_parallel(at::Tensor data, bool **D, int *C, int n, int d,
 #pragma omp parallel for collapse(2)
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < d; j++) {
+            if (counts[i] != 0) {
             means[i][j] /= counts[i];
         }
     }
@@ -394,7 +397,7 @@ float evaluate_cluster_parallel(at::Tensor data, bool **D, int *C, int n, int d,
 #pragma omp parallel for collapse(2)
     for (int j = 0; j < d; j++) {
         for (int i = 0; i < k; i++) {
-            if (D[i][j]) {
+            if (D[i][j] && counts[i] != 0) {
                 Y[i][j] /= counts[i];
             }
         }

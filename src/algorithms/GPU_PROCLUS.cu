@@ -269,8 +269,8 @@ void gpu_find_dimensions_kernel_X(float *d_X,
         int point = d_L[i * n + p];
         sum += std::abs(d_data[point * d + j] - data_ij);
     }
-
-    atomicAdd(&d_X[i * d + j], sum / L_i_sizes);
+    float avg = L_i_sizes > 0 ? sum / L_i_sizes : 0.;
+    atomicAdd(&d_X[i * d + j], avg);
 
 }
 
@@ -293,9 +293,8 @@ void gpu_find_dimensions_kernel_X_v2(float *d_X,
         int point = d_L[i * n + p];
         sum += std::abs(d_data[point * d + j] - data_ij);
     }
-
-    atomicAdd(&d_X[i * d + j], sum / L_i_sizes);
-
+    float avg = L_i_sizes > 0 ? sum / L_i_sizes : 0.;
+    atomicAdd(&d_X[i * d + j], avg);
 }
 
 
@@ -1282,7 +1281,7 @@ gpu_find_dimensions_kernel_KEEP_X(float *d_X, float *d_H, int *d_L_sizes, int d)
     int j = threadIdx.x; //independent for different d
     int L_i_size = d_L_sizes[i];
 
-    d_X[i * d + j] = d_H[i * d + j] / L_i_size;
+    d_X[i * d + j] = L_i_size > 0 ? d_H[i * d + j] / L_i_size : 0.;
 }
 
 void gpu_find_dimensions_keep(bool *d_D, float *d_Z, float *d_X, float *d_H,
@@ -1823,7 +1822,7 @@ gpu_find_dimensions_kernel_SAVE_X(float *__restrict__ d_X, float *__restrict__ d
     int m_idx = d_M_idx[i];
     int L_i_size = d_L_sizes[m_idx];
 
-    d_X[i * d + j] = d_H[m_idx * d + j] / L_i_size;
+    d_X[i * d + j] = L_i_size > 0 ? d_H[m_idx * d + j] / L_i_size : 0.;
 }
 
 void gpu_find_dimensions_save(bool *d_D, float *d_Z, float *d_X, float *d_H,
