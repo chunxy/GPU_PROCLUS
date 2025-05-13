@@ -519,7 +519,9 @@ gpu_assign_points_kernel(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes,
             dist += abs(d_data[p * d + j] - d_data[m_i * d + j]);
         }
 
-        dist /= size;
+        if (size > 0) {
+            dist /= size;
+        }
 
         atomicMin(&s_min_value[threadIdx.x], dist);
     }
