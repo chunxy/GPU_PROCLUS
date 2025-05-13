@@ -3,7 +3,7 @@ import numpy as np
 import time
 import torch
 
-from python.GPU_PROCLUS import PROCLUS_parallel, GPU_PROCLUS
+from python.GPU_PROCLUS import PROCLUS_parallel, GPU_PROCLUS, GPU_FAST_PROCLUS, GPU_FAST_star_PROCLUS
 
 torch.cuda.synchronize()
 
@@ -25,8 +25,8 @@ args = parser.parse_args()
 
 if args.name not in datasets:
     raise ValueError(f"Invalid dataset name: {args.name}. Must be one of {list(datasets.keys())}")
-if args.device not in ["GPU", "CPU"]:
-    raise ValueError(f"Invalid device: {args.device}. Must be one of ['GPU', 'CPU']")
+if args.device not in ["GPU", "CPU", "GPU_SAVE", "GPU_KEEP"]:
+    raise ValueError(f"Invalid device: {args.device}. Must be one of ['GPU', 'CPU', 'GPU_SAVE', 'GPU_KEEP']")
 
 name = args.name
 nlist = args.nlist
@@ -56,7 +56,9 @@ for k in ks:
         print("k:", k, "l:", l)
         t0 = time.time()
         rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
-        medoids = rs[0].to("cpu").to_numpy()
-        medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
+        medoids, subspaces, ranking = rs[0]
+        medoids.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
+        subspaces.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
+        ranking.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
