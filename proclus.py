@@ -74,8 +74,8 @@ for k in ks:
             print("----------------------------------------")
             raise
         indices, subspaces, clustering = rs[0]
-        indices.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
-        subspaces.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
-        clustering.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
+        indices.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
+        subspaces.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
+        clustering.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
