@@ -56,7 +56,7 @@ for k in ks:
         print("k:", k, "l:", l)
         t0 = time.time()
         rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
-        medoids = rs.to("cpu").to_numpy()
+        medoids = rs[0].to("cpu").to_numpy()
         medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
