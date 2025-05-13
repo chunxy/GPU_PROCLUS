@@ -63,9 +63,9 @@ for k in ks:
         print("k:", k, "l:", l)
         t0 = time.time()
         rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
-        medoids, subspaces, ranking = rs[0]
-        medoids.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
+        indices, subspaces, clustering = rs[0]
+        indices.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
         subspaces.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
-        ranking.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
+        clustering.to("cpu").to_numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
