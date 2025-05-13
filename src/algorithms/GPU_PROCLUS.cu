@@ -6,7 +6,6 @@
 #include "../utils/gpu_util.cuh"
 #include "../utils/cuda_util.cuh"
 #include "GPU_PROCLUS.cuh"
-#include <stdio.h>
 
 
 #define BLOCK_SIZE 1024
@@ -15,7 +14,6 @@
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 
 inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort = true) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     if (code != cudaSuccess) {
         fprintf(stderr, "GPUassert: %s %s %d\n", cudaGetErrorString(code), file, line);
         if (abort) exit(code);
@@ -23,7 +21,6 @@ inline void gpuAssert(cudaError_t code, const char *file, int line, bool abort =
 }
 
 int get_current_memory_usage() {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     size_t free_byte;
     size_t total_byte;
     cudaMemGetInfo(&free_byte, &total_byte);
@@ -33,7 +30,6 @@ int get_current_memory_usage() {
 __device__ __forceinline__
 
 float atomicMin(float *addr, float value) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     float old;
     old = (value >= 0) ? __int_as_float(atomicMin((int *) addr, __float_as_int(value))) :
           __uint_as_float(atomicMax((unsigned int *) addr, __float_as_uint(value)));
@@ -44,7 +40,6 @@ float atomicMin(float *addr, float value) {
 __device__ __forceinline__
 
 float atomicMax(float *addr, float value) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     float old;
     old = (value >= 0) ? __int_as_float(atomicMax((int *) addr, __float_as_int(value))) :
           __uint_as_float(atomicMin((unsigned int *) addr, __float_as_uint(value)));
@@ -55,7 +50,6 @@ float atomicMax(float *addr, float value) {
 __global__
 void gpu_greedy_kernel_dist_max(float *d_max_value, float *d_data, int *M, int *d_S, float *dist, int Ak, int d,
                                 int mediod_idx) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int m_i = M[mediod_idx];
     for (int i = blockIdx.x * blockDim.x + threadIdx.x; i < Ak; i += blockDim.x * gridDim.x) {
         float distance = 0;
@@ -81,7 +75,6 @@ void gpu_greedy_kernel_dist_max(float *d_max_value, float *d_data, int *M, int *
 
 __global__
 void gpu_greedy_kernel_largest_2(float *d_max_value, int *d_S, int *M, float *dist, int *d_prev, int Ak, int i, int n) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     for (int v = blockIdx.x * blockDim.x + threadIdx.x; v < Ak; v += blockDim.x * gridDim.x) {
         if (dist[v] == d_max_value[0]) {
             M[i] = d_S[v];
@@ -93,7 +86,7 @@ void gpu_greedy_kernel_largest_2(float *d_max_value, int *d_S, int *M, float *di
 __global__
 void gpu_greedy_kernel_dist_min_max(float *d_max_value, float *d_data, int *M, int *d_S, float *dist, int Ak, int d,
                                     int mediod_idx) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     __shared__ float max_value;
     max_value = 0.;
     __syncthreads();
@@ -124,7 +117,8 @@ void gpu_greedy_kernel_dist_min_max(float *d_max_value, float *d_data, int *M, i
 int *gpu_greedy(float *d_data, int *d_S,
                 int *d_M, float *d_dist, int *d_prev, float *d_max_value,
                 int Bk, int Ak, int d, int n) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
+
     //cudaMalloc(&d_M, Bk * sizeof(int));
     //cudaMalloc(&d_dist, Ak * sizeof(float));
     //cudaMalloc(&d_prev, sizeof(int));
@@ -157,7 +151,6 @@ int *gpu_greedy(float *d_data, int *d_S,
 
 __global__
 void gpu_compute_L_kernel_sum_dist_V2(float *d_dist_n_k, int *d_M_current, float *d_data, int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int i = blockIdx.x;
     int m_i = d_M_current[i];
 
@@ -181,7 +174,6 @@ void gpu_compute_L_kernel_sum_dist_V2(float *d_dist_n_k, int *d_M_current, float
 
 __global__
 void gpu_compute_L_kernel_compute_delta_V2(float *d_delta, float *d_dist_n_k, int *d_M_current, int n, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     for (int i = threadIdx.x; i < k; i += blockDim.x) {//independent
         d_delta[i] = 1000000.;//todo not nice
         for (int j = 0; j < k; j++) {
@@ -197,7 +189,6 @@ void gpu_compute_L_kernel_compute_delta_V2(float *d_delta, float *d_dist_n_k, in
 
 __global__
 void gpu_compute_L_kernel_compute_L_V2(int *d_L, int *d_L_sizes, float *d_delta, float *d_dist_n_k, int n, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     for (int i = blockIdx.x; i < k; i += gridDim.x) {//independent
         for (int p = threadIdx.x; p < n; p += blockDim.x) {
             if (d_dist_n_k[i * n + p] <= d_delta[i]) {
@@ -214,7 +205,7 @@ void gpu_compute_L(int *d_L, int *d_L_sizes,
                    int *d_M_current,
                    float *d_data,
                    int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int number_of_blocks = n / BLOCK_SIZE_SMALL;
     if (n % BLOCK_SIZE_SMALL) number_of_blocks++;
     dim3 grid_k_n(k, number_of_blocks);
@@ -234,7 +225,7 @@ void gpu_compute_L(int *d_L, int *d_L_sizes,
 __global__
 void
 gpu_find_dimensions_kernel_Z(float *__restrict__ d_Z, const float *__restrict__ d_X, const int k, const int d) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int i = blockIdx.x;//independent for different k
     int j = threadIdx.x;//independent for different d
 
@@ -272,7 +263,6 @@ void gpu_find_dimensions_kernel_X(float *d_X,
                                   int *d_M_current,
                                   float *d_data,
                                   int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int i = blockIdx.x; //independent for different k
     int j = threadIdx.x; //independent for different d
 
@@ -297,7 +287,6 @@ void gpu_find_dimensions_kernel_X_v2(float *d_X,
                                      int *d_M_current,
                                      float *d_data,
                                      int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int i = blockIdx.x; //independent for different k
     int j = blockIdx.y; //independent for different d
 
@@ -317,7 +306,6 @@ void gpu_find_dimensions_kernel_X_v2(float *d_X,
 
 __global__
 void gpu_find_dimensions_kernel_compute_D(bool *d_D, float *d_Z, int k, int d, int l) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     //# ensuring that we find atleast 2 for each and than the k*l #todo fast - sort first instead
 
     extern __shared__ float min_values[];
@@ -384,7 +372,6 @@ void gpu_find_dimensions_kernel_compute_D(bool *d_D, float *d_Z, int k, int d, i
 
 __global__
 void gpu_find_dimensions_kernel_D(bool *d_D, float *d_Z, int k, int d, int l) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     //# ensuring that we find atleast 2 for each and than the k*l #todo fast - sort first instead
 
     for (int _ = 0; _ < 2; _++) {
@@ -425,7 +412,6 @@ void gpu_find_dimensions(bool *d_D, float *d_Z, float *d_X,
                          int *d_M_current,
                          float *d_data,
                          int n, int d, int k, int l) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int number_of_blocks = (k * d) / BLOCK_SIZE;
     if ((k * d) % BLOCK_SIZE) number_of_blocks++;
 
@@ -464,7 +450,7 @@ void gpu_find_dimensions(bool *d_D, float *d_Z, float *d_X,
 __global__
 void
 gpu_restructure_D(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes, const bool *__restrict__ d_D, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int i = blockIdx.x;
     int j = threadIdx.x;
 
@@ -511,7 +497,7 @@ gpu_assign_points_kernel(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes,
                          int *__restrict__ d_C, int *__restrict__ d_C_size,
                          const float *__restrict__ d_data, const int *__restrict__ d_M_current,
                          const int n, const int k, const int d) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     extern __shared__ float s_min_value[];
 
     float dist = 0;
@@ -603,7 +589,7 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
                        int *d_M_current,
                        float *d_data,
                        int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int remaining = BLOCK_SIZE_SMALL / k;
     int number_of_blocks = n / remaining;
     if (n % remaining) number_of_blocks++;
@@ -644,7 +630,7 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
                                  int *d_C_size, bool *d_D, int *d_D_sizes,
                                  float *d_data,
                                  int n, int d, int k) { //  --  40.99%  413ms
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     __shared__ float tmp_mean;
     __shared__ float tmp_cost;
     float tmp;
@@ -683,7 +669,7 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
 void
 gpu_evaluate_cluster(float *d_cost, int *d_C, int *d_C_sizes, bool *d_D, int *d_D_sizes, float *d_data,
                      int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int number_of_blocks = n / BLOCK_SIZE;
     if (n % BLOCK_SIZE) number_of_blocks++;
     dim3 grid(d, k);
@@ -700,7 +686,6 @@ gpu_evaluate_cluster(float *d_cost, int *d_C, int *d_C_sizes, bool *d_D, int *d_
 __global__
 void
 gpu_update_best_kernel_is_best(float *d_objective_function, float *d_best_objective, int *d_termination_criterion) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     d_termination_criterion[0]++;
     if (d_objective_function[0] < d_best_objective[0]) {
         d_termination_criterion[0] = 0;
@@ -712,7 +697,7 @@ __global__
 void
 gpu_update_best_kernel_init_k(int *d_termination_criterion, int *d_M_best, int *d_M_current,
                               bool *d_bad, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     if (d_termination_criterion[0] == 0) {//todo worng!!!! then we allways pick the last????
         for (int i = threadIdx.x; i < k; i += blockDim.x) {
             d_M_best[i] = d_M_current[i];
@@ -725,7 +710,7 @@ __global__
 void
 gpu_update_best_kernel_C(int *d_C_best, int *d_C_sizes_best, int *d_C, int *d_C_sizes, int *d_termination_criterion,
                          int n) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     if (d_termination_criterion[0] == 0) {
         int i = blockIdx.x;
 
@@ -743,7 +728,7 @@ gpu_update_best_kernel_C(int *d_C_best, int *d_C_sizes_best, int *d_C, int *d_C_
 __global__
 void gpu_update_best_kernel_find_bad(int *d_C_sizes_best, int *d_termination_criterion, bool *d_bad, int k, int n,
                                      float min_deviation) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     __shared__ int min_value;
     min_value = 1000000.;
 
@@ -777,7 +762,7 @@ gpu_update_best(float *d_cost, float *d_cost_best,
                 int *d_C, int *d_C_sizes, int *d_C_best, int *d_C_sizes_best,
                 bool *d_bad,
                 float min_deviation, int n, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     gpu_update_best_kernel_is_best << < 1, 1 >> > (d_cost, d_cost_best, d_termination_criterion);
     gpu_update_best_kernel_init_k << < 1, k >> > (d_termination_criterion, d_M_best, d_M_current, d_bad, k);
     gpu_update_best_kernel_C << < k, BLOCK_SIZE >> >
@@ -790,7 +775,7 @@ gpu_update_best(float *d_cost, float *d_cost_best,
 __global__
 void gpu_replace_medoids_kernel(int *d_M_current, int *d_M_random, int *d_M, int *d_M_best, bool *d_bad,
                                 int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int j = 0;
     for (int i = 0; i < k; i++) {
         if (!d_bad[i]) {
@@ -818,7 +803,6 @@ void gpu_replace_medoids_kernel(int *d_M_current, int *d_M_random, int *d_M, int
 
 __global__
 void remove_outliers_kernel_min_delta(float *d_delta, bool *d_D, int *d_M_best, float *d_data, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     for (int i = blockIdx.x; i < k; i += gridDim.x) {
         for (int j = threadIdx.x; j < k; j += blockDim.x) {
             if (i != j) {
@@ -846,7 +830,7 @@ remove_outliers_kernel_remove(int *d_C_result, int *d_C_best, int *d_C_sizes_bes
                               int *d_M_best,
                               float *d_data,
                               int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     int i = blockIdx.x;
 
     int C_i_size = d_C_sizes_best[i];
@@ -883,7 +867,7 @@ void remove_outliers(int *d_C_result, int *d_C_best, int *d_C_sizes_best,
                      int *d_M_best,
                      float *d_data,
                      int n, int d, int k) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
+
     set_all << < 1, k >> > (d_delta, 1000000., k);//todo not nice
 
     remove_outliers_kernel_min_delta << < k, min(k, BLOCK_SIZE) >> > (d_delta,
@@ -903,14 +887,12 @@ void remove_outliers(int *d_C_result, int *d_C_best, int *d_C_sizes_best,
 
 __global__
 void fill_with_indices_kernel(int *d_S, int n) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     for (int p = blockIdx.x * blockDim.x + threadIdx.x; p < n; p += blockDim.x * gridDim.x) {
         d_S[p] = p;
     }
 }
 
 void fill_with_indices(int *d_S, int n) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     int number_of_blocks = n / BLOCK_SIZE;
     if (n % BLOCK_SIZE) number_of_blocks++;
     fill_with_indices_kernel << < number_of_blocks, min(n, BLOCK_SIZE) >> > (d_S, n);
@@ -918,7 +900,6 @@ void fill_with_indices(int *d_S, int n) {
 
 std::pair<std::vector<at::Tensor>, int>
 GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation, int termination_rounds, bool debug) {
-    printf("Function: %s, Line: %d\n", __func__, __LINE__);
     cudaDeviceSynchronize();
 //    cudaProfilerStart();
 
