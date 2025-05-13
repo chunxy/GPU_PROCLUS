@@ -53,7 +53,7 @@ for k in ks:
     for l in ls:
         print("k:", k, "l:", l)
         t0 = time.time()
-        rs = GPU_PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
+        rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
         medoids = rs.to("cpu").to_numpy()
         medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
         elapsed_time += time.time() - t0
