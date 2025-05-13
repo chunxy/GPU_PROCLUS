@@ -1020,28 +1020,28 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_M_current,
                       d_data,
                       n, d, k);
-
+        printf("L computed\n");
         //// find dimensions ////
         gpu_find_dimensions(d_D, d_Z, d_X,
                             d_L, d_L_sizes,
                             d_M_current,
                             d_data,
                             n, d, k, l);
-
+        printf("Dimensions found\n");
         //// assign points /////
         gpu_assign_points(d_C, d_C_sizes,
                           d_D, d_Ds, d_D_sizes,
                           d_M_current,
                           d_data,
                           n, d, k);
-
+        printf("Points assigned\n");
         //// evaluate clustering ////
         gpu_evaluate_cluster(d_cost,
                              d_C, d_C_sizes,
                              d_D, d_D_sizes,
                              d_data,
                              n, d, k);
-
+        printf("Clustering evaluated\n");
 
         if (debug) {
 //            printf("d_delta: ");
@@ -1067,7 +1067,7 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                         d_C, d_C_sizes, d_C_best, d_C_sizes_best,
                         d_bad,
                         min_deviation, n, k);
-
+        printf("Best updated\n");
         if (debug) {
             printf("d_bad: ");
             print_array_gpu(d_bad, k);
@@ -1088,27 +1088,27 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
         gpu_replace_medoids_kernel << < 1, 1 >> > (d_M_current, d_M_random, d_M, d_M_best, d_bad, k);
 
     }
-
+    printf("Refinement Phase\n");
     //// Refinement Phase ////
     gpu_find_dimensions(d_D, d_Z, d_X,
                         d_C_best, d_C_sizes_best,
                         d_M_best,
                         d_data,
                         n, d, k, l);
-
+    printf("Dimensions found\n");
     gpu_assign_points(d_C_best, d_C_sizes_best,
                       d_D, d_Ds, d_D_sizes,
                       d_M_best,
                       d_data,
                       n, d, k);
-
+    printf("Points assigned\n");
     remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
                     d_D,
                     d_delta,
                     d_M_best,
                     d_data,
                     n, d, k);
-
+    printf("Outliers removed\n");
     // building result
     std::vector <at::Tensor> r;
 
