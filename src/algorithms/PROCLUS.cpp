@@ -379,7 +379,8 @@ float evaluate_cluster_parallel(at::Tensor data, bool **D, int *C, int n, int d,
     for (int i = 0; i < k; i++) {
         for (int j = 0; j < d; j++) {
             if (counts[i] != 0) {
-            means[i][j] /= counts[i];
+                means[i][j] /= counts[i];
+            }
         }
     }
 
