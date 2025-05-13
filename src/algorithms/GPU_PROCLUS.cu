@@ -236,7 +236,9 @@ gpu_find_dimensions_kernel_Z(float *__restrict__ d_Z, const float *__restrict__ 
     __syncthreads();
 
     float X_ij = d_X[i * d + j];
-    atomicAdd(&Y_i, X_ij / d);
+    if (d != 0) {
+        atomicAdd(&Y_i, X_ij / d);
+    }
     __syncthreads();
 ////
     float sub = X_ij - Y_i;
@@ -250,7 +252,9 @@ gpu_find_dimensions_kernel_Z(float *__restrict__ d_Z, const float *__restrict__ 
     }
     __syncthreads();
 ////
-    d_Z[i * d + j] = sub / sigma_i;
+    if (sigma_i != 0) {
+        d_Z[i * d + j] = sub / sigma_i;
+    }
 }
 
 __global__
