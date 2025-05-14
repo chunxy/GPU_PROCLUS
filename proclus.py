@@ -46,8 +46,8 @@ elif args.device == "CPU":
 print(f"Running {name}: {dold} -> {dnew}")
 
 file = f"/research/d1/gds/cxye23/datasets/data/{name}_base.float32"
-X = np.fromfile(file, dtype=np.float32).reshape((-1, dold))
-X = torch.from_numpy(X).to(torch.float32)
+X_np = np.fromfile(file, dtype=np.float32).reshape((-1, dold))
+X = torch.from_numpy(X_np).to(torch.float32)
 
 elapsed_time = 0
 rounds = 1
@@ -74,8 +74,12 @@ for k in ks:
             print("----------------------------------------")
             raise
         indices, subspaces, clustering = rs[0]
-        indices.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
-        subspaces.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
-        clustering.to("cpu").numpy().tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
+        indices = indices.to("cpu").numpy()
+        medoids = X_np[indices]
+        medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids", dtype=np.float32)
+        subspaces = subspaces.to("cpu").to(torch.float32).numpy()
+        subspaces.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces", dtype=np.float32)
+        clustering = clustering.to("cpu").numpy()
+        clustering.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking", dtype=np.int64)
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
