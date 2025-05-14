@@ -236,25 +236,19 @@ gpu_find_dimensions_kernel_Z(float *__restrict__ d_Z, const float *__restrict__ 
     __syncthreads();
 
     float X_ij = d_X[i * d + j];
-    if (d != 0) {
-        atomicAdd(&Y_i, X_ij / d);
-    }
+    atomicAdd(&Y_i, X_ij / d);
     __syncthreads();
 ////
     float sub = X_ij - Y_i;
     atomicAdd(&sigma_i, sub * sub);
     __syncthreads();
     if (threadIdx.x == 0) {//only one should do this
-        if (d > 1) {
-            sigma_i /= (d - 1);
-        }
+        sigma_i /= (d - 1);
         sigma_i = std::sqrt(sigma_i);
     }
     __syncthreads();
 ////
-    if (sigma_i != 0) {
-        d_Z[i * d + j] = sub / sigma_i;
-    }
+    d_Z[i * d + j] = sub / sigma_i;
 }
 
 __global__
@@ -275,8 +269,8 @@ void gpu_find_dimensions_kernel_X(float *d_X,
         int point = d_L[i * n + p];
         sum += std::abs(d_data[point * d + j] - data_ij);
     }
-    float avg = L_i_sizes > 0 ? sum / L_i_sizes : 0.;
-    atomicAdd(&d_X[i * d + j], avg);
+
+    atomicAdd(&d_X[i * d + j], sum / L_i_sizes);
 
 }
 
@@ -299,8 +293,9 @@ void gpu_find_dimensions_kernel_X_v2(float *d_X,
         int point = d_L[i * n + p];
         sum += std::abs(d_data[point * d + j] - data_ij);
     }
-    float avg = L_i_sizes > 0 ? sum / L_i_sizes : 0.;
-    atomicAdd(&d_X[i * d + j], avg);
+
+    atomicAdd(&d_X[i * d + j], sum / L_i_sizes);
+
 }
 
 
@@ -519,9 +514,7 @@ gpu_assign_points_kernel(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes,
             dist += abs(d_data[p * d + j] - d_data[m_i * d + j]);
         }
 
-        if (size != 0) {
-            dist /= size;
-        }
+        dist /= size;
 
         atomicMin(&s_min_value[threadIdx.x], dist);
     }
@@ -592,7 +585,7 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
                        float *d_data,
                        int n, int d, int k) {
 
-    int remaining = max(BLOCK_SIZE_SMALL / k, 1);
+    int remaining = BLOCK_SIZE_SMALL / k;
     int number_of_blocks = n / remaining;
     if (n % remaining) number_of_blocks++;
     dim3 block_n_k(min(n, remaining), k);
@@ -613,6 +606,7 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
     gpu_assign_points_kernel << < number_of_blocks, block_n_k, min(n, remaining) * sizeof(float) >> > (
             d_Ds, d_D_sizes, d_C, d_C_sizes, d_data, d_M_current, n, k, d);
     gpuErrchk(cudaPeekAtLastError());
+
 
 /*
     dim3 block_k_n(k, min(n, remaining));
@@ -650,9 +644,7 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
             int p = d_C[i * n + l];
             tmp += d_data[p * d + j];
         }
-        if (size != 0) {
-            atomicAdd(&tmp_mean, tmp / size);
-        }
+        atomicAdd(&tmp_mean, tmp / size);
 
         tmp_cost = 0;
         __syncthreads();
@@ -662,9 +654,7 @@ void gpu_evaluate_cluster_kernel(float *d_cost, int *d_C,
             tmp += abs(d_data[p * d + j] - tmp_mean);
         }
 
-        if (tmp_2 != 0) {
-            atomicAdd(&tmp_cost, tmp / tmp_2);
-        }
+        atomicAdd(&tmp_cost, tmp / tmp_2);
         __syncthreads();
         if (threadIdx.x == 0)
             atomicAdd(&d_cost[0], tmp_cost);
@@ -819,9 +809,7 @@ void remove_outliers_kernel_min_delta(float *d_delta, bool *d_D, int *d_M_best, 
                         size++;
                     }
                 }
-                if (size != 0) {
-                    msd /= size;
-                }
+                msd /= size;
 
                 atomicMin(&d_delta[i], msd);
             }
@@ -855,9 +843,7 @@ remove_outliers_kernel_remove(int *d_C_result, int *d_C_best, int *d_C_sizes_bes
                     size++;
                 }
             }
-            if (size != 0) {
-                msd /= size;
-            }
+            msd /= size;
 
             if (msd <= d_delta[l]) {
                 clustered = i;
@@ -1029,28 +1015,28 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_M_current,
                       d_data,
                       n, d, k);
-        printf("L computed\n");
+
         //// find dimensions ////
         gpu_find_dimensions(d_D, d_Z, d_X,
                             d_L, d_L_sizes,
                             d_M_current,
                             d_data,
                             n, d, k, l);
-        printf("Dimensions found\n");
+
         //// assign points /////
         gpu_assign_points(d_C, d_C_sizes,
                           d_D, d_Ds, d_D_sizes,
                           d_M_current,
                           d_data,
                           n, d, k);
-        printf("Points assigned\n");
+
         //// evaluate clustering ////
         gpu_evaluate_cluster(d_cost,
                              d_C, d_C_sizes,
                              d_D, d_D_sizes,
                              d_data,
                              n, d, k);
-        printf("Clustering evaluated\n");
+
 
         if (debug) {
 //            printf("d_delta: ");
@@ -1076,7 +1062,7 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                         d_C, d_C_sizes, d_C_best, d_C_sizes_best,
                         d_bad,
                         min_deviation, n, k);
-        printf("Best updated\n");
+
         if (debug) {
             printf("d_bad: ");
             print_array_gpu(d_bad, k);
@@ -1097,27 +1083,27 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
         gpu_replace_medoids_kernel << < 1, 1 >> > (d_M_current, d_M_random, d_M, d_M_best, d_bad, k);
 
     }
-    printf("Refinement Phase\n");
+
     //// Refinement Phase ////
     gpu_find_dimensions(d_D, d_Z, d_X,
                         d_C_best, d_C_sizes_best,
                         d_M_best,
                         d_data,
                         n, d, k, l);
-    printf("Dimensions found\n");
+
     gpu_assign_points(d_C_best, d_C_sizes_best,
                       d_D, d_Ds, d_D_sizes,
                       d_M_best,
                       d_data,
                       n, d, k);
-    printf("Points assigned\n");
+
     remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
                     d_D,
                     d_delta,
                     d_M_best,
                     d_data,
                     n, d, k);
-    printf("Outliers removed\n");
+
     // building result
     std::vector <at::Tensor> r;
 
@@ -1296,7 +1282,7 @@ gpu_find_dimensions_kernel_KEEP_X(float *d_X, float *d_H, int *d_L_sizes, int d)
     int j = threadIdx.x; //independent for different d
     int L_i_size = d_L_sizes[i];
 
-    d_X[i * d + j] = L_i_size > 0 ? d_H[i * d + j] / L_i_size : 0.;
+    d_X[i * d + j] = d_H[i * d + j] / L_i_size;
 }
 
 void gpu_find_dimensions_keep(bool *d_D, float *d_Z, float *d_X, float *d_H,
@@ -1837,7 +1823,7 @@ gpu_find_dimensions_kernel_SAVE_X(float *__restrict__ d_X, float *__restrict__ d
     int m_idx = d_M_idx[i];
     int L_i_size = d_L_sizes[m_idx];
 
-    d_X[i * d + j] = L_i_size != 0 ? d_H[m_idx * d + j] / L_i_size : 0.;
+    d_X[i * d + j] = d_H[m_idx * d + j] / L_i_size;
 }
 
 void gpu_find_dimensions_save(bool *d_D, float *d_Z, float *d_X, float *d_H,
