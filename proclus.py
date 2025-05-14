@@ -75,11 +75,11 @@ for k in ks:
             raise
         indices, subspaces, clustering = rs[0]
         indices = indices.to("cpu").numpy()
-        medoids = X_np[indices]
-        medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids", dtype=np.float32)
+        medoids = X_np[indices].astype(np.float32)
+        medoids.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.medoids")
         subspaces = subspaces.to("cpu").to(torch.float32).numpy()
-        subspaces.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces", dtype=np.float32)
-        clustering = clustering.to("cpu").numpy()
-        clustering.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking", dtype=np.int64)
+        subspaces.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.subspaces")
+        clustering = clustering.to("cpu").to(torch.int64).numpy()
+        clustering.tofile(f"/research/d1/gds/cxye23/datasets/data/{name}.{k}.{l}.proclus.ranking")
         elapsed_time += time.time() - t0
 print("Elapsed time: %.4fs" % elapsed_time)
