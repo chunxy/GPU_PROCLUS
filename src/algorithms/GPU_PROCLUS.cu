@@ -6,6 +6,7 @@
 #include "../utils/gpu_util.cuh"
 #include "../utils/cuda_util.cuh"
 #include "GPU_PROCLUS.cuh"
+#include <stdio.h>
 
 
 #define BLOCK_SIZE 1024
@@ -1015,28 +1016,28 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_M_current,
                       d_data,
                       n, d, k);
-
+        printf("L computed\n");
         //// find dimensions ////
         gpu_find_dimensions(d_D, d_Z, d_X,
                             d_L, d_L_sizes,
                             d_M_current,
                             d_data,
                             n, d, k, l);
-
+        printf("dimensions computed\n");
         //// assign points /////
         gpu_assign_points(d_C, d_C_sizes,
                           d_D, d_Ds, d_D_sizes,
                           d_M_current,
                           d_data,
                           n, d, k);
-
+        printf("points assigned\n");
         //// evaluate clustering ////
         gpu_evaluate_cluster(d_cost,
                              d_C, d_C_sizes,
                              d_D, d_D_sizes,
                              d_data,
                              n, d, k);
-
+        printf("cost computed\n");
 
         if (debug) {
 //            printf("d_delta: ");
