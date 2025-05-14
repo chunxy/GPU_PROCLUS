@@ -9,7 +9,7 @@
 
 
 #define BLOCK_SIZE 1024
-#define BLOCK_SIZE_SMALL 1024
+#define BLOCK_SIZE_SMALL 128
 
 #define gpuErrchk(ans) { gpuAssert((ans), __FILE__, __LINE__); }
 
@@ -592,7 +592,7 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
                        float *d_data,
                        int n, int d, int k) {
 
-    int remaining = BLOCK_SIZE_SMALL / k;
+    int remaining = max(BLOCK_SIZE_SMALL / k, 1);
     int number_of_blocks = n / remaining;
     if (n % remaining) number_of_blocks++;
     dim3 block_n_k(min(n, remaining), k);
