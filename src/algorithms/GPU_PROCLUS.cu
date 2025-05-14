@@ -589,6 +589,7 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
     int remaining = max(BLOCK_SIZE_SMALL / k, 1);
     int number_of_blocks = n / remaining;
     if (n % remaining) number_of_blocks++;
+    printf("Initialize block_n_k with %d and %d \n", min(n, remaining), k);
     dim3 block_n_k(min(n, remaining), k);
     gpuErrchk(cudaPeekAtLastError());
 
