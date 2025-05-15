@@ -586,7 +586,8 @@ void gpu_assign_points(int *d_C, int *d_C_sizes,
                        float *d_data,
                        int n, int d, int k) {
 
-    int remaining = max(BLOCK_SIZE_SMALL / k, 1);
+    // int remaining = max(BLOCK_SIZE_SMALL / k, 1);
+    int remaining = 1024 / k;
     int number_of_blocks = n / remaining;
     if (n % remaining) number_of_blocks++;
     printf("Initialize block_n_k with %d and %d \n", min(n, remaining), k);
