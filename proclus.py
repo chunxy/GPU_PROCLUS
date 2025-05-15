@@ -50,13 +50,12 @@ X_np = np.fromfile(file, dtype=np.float32).reshape((-1, dold))
 X = torch.from_numpy(X_np).to(torch.float32)
 
 elapsed_time = 0
-rounds = 1
 ks = [nlist]
 ls = [dnew]
-a = 10
-b = nlist
-min_deviation = 0.7
-termination_rounds = 30
+a = 100
+b = 10
+min_deviation = 0.2
+termination_rounds = 50
 print(f"Using {args.device}")
 print(X.shape)
 for k in ks:
