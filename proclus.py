@@ -54,7 +54,7 @@ rounds = 1
 ks = [nlist]
 ls = [dnew]
 a = 10
-b = 5
+b = nlist
 min_deviation = 0.7
 termination_rounds = 30
 print(f"Using {args.device}")
