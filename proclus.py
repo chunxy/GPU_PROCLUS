@@ -22,7 +22,7 @@ parser.add_argument("--name", type=str, required=True, help="Dataset name to pro
 parser.add_argument("--nlist", type=int, required=True, help="Number of clusters")
 parser.add_argument("--dnew", type=int, required=True, help="Intrinsic dimension")
 parser.add_argument("--device", type=str, required=True, help="Using GPU or CPU")
-parser.add_argument("--debug", type=bool, default=False, help="Print debug info or not")
+parser.add_argument("--debug", type=bool, action="store_true", help="Print debug info or not")
 args = parser.parse_args()
 
 if args.name not in datasets:
