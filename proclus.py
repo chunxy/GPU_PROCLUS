@@ -56,7 +56,7 @@ ls = [dnew]
 a = 10
 b = 5
 min_deviation = 0.5
-termination_rounds = 1 if debug else 30
+termination_rounds = 30
 print(f"Using {args.device}")
 print(X.shape)
 for k in ks:
