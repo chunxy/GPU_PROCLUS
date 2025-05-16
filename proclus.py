@@ -52,10 +52,10 @@ X = torch.from_numpy(X_np).to(torch.float32)
 elapsed_time = 0
 ks = [nlist]
 ls = [dnew]
-a = 100
-b = 10
-min_deviation = 0.2
-termination_rounds = 50
+a = 10
+b = 5
+min_deviation = 0.5
+termination_rounds = 30
 print(f"Using {args.device}")
 print(X.shape)
 for k in ks:
