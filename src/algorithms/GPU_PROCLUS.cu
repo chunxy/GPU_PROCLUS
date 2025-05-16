@@ -1100,12 +1100,12 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_data,
                       n, d, k);
 
-    // remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
-    //                 d_D,
-    //                 d_delta,
-    //                 d_M_best,
-    //                 d_data,
-    //                 n, d, k);
+    remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
+                    d_D,
+                    d_delta,
+                    d_M_best,
+                    d_data,
+                    n, d, k);
 
     // building result
     std::vector <at::Tensor> r;
