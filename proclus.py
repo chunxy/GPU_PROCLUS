@@ -22,6 +22,7 @@ parser.add_argument("--name", type=str, required=True, help="Dataset name to pro
 parser.add_argument("--nlist", type=int, required=True, help="Number of clusters")
 parser.add_argument("--dnew", type=int, required=True, help="Intrinsic dimension")
 parser.add_argument("--device", type=str, required=True, help="Using GPU or CPU")
+parser.add_argument("--debug", type=bool, required=True, help="Print debug info or not")
 args = parser.parse_args()
 
 if args.name not in datasets:
@@ -33,7 +34,7 @@ name = args.name
 nlist = args.nlist
 dold = datasets[name]
 dnew = args.dnew
-
+debug = args.debug
 if args.device == "GPU_KEEP":
     PROCLUS = GPU_FAST_star_PROCLUS
 elif args.device == "GPU_SAVE":
@@ -47,7 +48,7 @@ print(f"Running {name}: {dold} -> {dnew}")
 
 file = f"/research/d1/gds/cxye23/datasets/data/{name}_base.float32"
 X_np = np.fromfile(file, dtype=np.float32).reshape((-1, dold))
-X = torch.from_numpy(X_np).to(torch.float32)
+X = torch.from_numpy(X_np)
 
 elapsed_time = 0
 ks = [nlist]
@@ -55,7 +56,7 @@ ls = [dnew]
 a = 10
 b = 5
 min_deviation = 0.5
-termination_rounds = 30
+termination_rounds = 1 if debug else 30
 print(f"Using {args.device}")
 print(X.shape)
 for k in ks:
@@ -63,7 +64,7 @@ for k in ks:
         print("k:", k, "l:", l)
         t0 = time.time()
         try:
-            rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
+            rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds, debug)
         except Exception as e:
             print("\nFloating point exception occurred at:")
             print("----------------------------------------")
