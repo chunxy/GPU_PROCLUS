@@ -53,8 +53,8 @@ X = torch.from_numpy(X_np)
 elapsed_time = 0
 ks = [nlist]
 ls = [dnew]
-a = 10
-b = 5
+a = 100
+b = 10
 min_deviation = 0.5
 termination_rounds = 30
 print(f"Using {args.device}")
