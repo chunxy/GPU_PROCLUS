@@ -504,7 +504,7 @@ gpu_assign_points_kernel(int *__restrict__ d_Ds, int *__restrict__ d_D_sizes,
 
     int p = blockIdx.x * blockDim.x + threadIdx.x;
 
-    s_min_value[threadIdx.x] = 1000000.;
+    s_min_value[threadIdx.x] = 1e30;
     __syncthreads();
 
     if (p < n) {
@@ -1100,12 +1100,12 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_data,
                       n, d, k);
 
-    remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
-                    d_D,
-                    d_delta,
-                    d_M_best,
-                    d_data,
-                    n, d, k);
+    // remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
+    //                 d_D,
+    //                 d_delta,
+    //                 d_M_best,
+    //                 d_data,
+    //                 n, d, k);
 
     // building result
     std::vector <at::Tensor> r;
