@@ -55,7 +55,7 @@ ks = [nlist]
 ls = [dnew]
 a = 100
 b = 10
-min_deviation = 0.2
+min_deviation = 0
 termination_rounds = 30
 print(f"Using {args.device}")
 print(X.shape)
