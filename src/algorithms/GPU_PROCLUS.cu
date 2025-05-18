@@ -738,11 +738,12 @@ void gpu_update_best_kernel_find_bad(int *d_C_sizes_best, int *d_termination_cri
         }
         __syncthreads();
 
-        for (int i = threadIdx.x; i < k; i += blockDim.x) {
-            if (d_C_sizes_best[i] == min_value) {
-                d_bad[i] = true;
-            }
-        }
+        // Do not make it bad.
+        // for (int i = threadIdx.x; i < k; i += blockDim.x) {
+        //     if (d_C_sizes_best[i] == min_value) {
+        //         d_bad[i] = true;
+        //     }
+        // }
         __syncthreads();
 
         for (int i = threadIdx.x; i < k; i += blockDim.x) {
@@ -1100,12 +1101,12 @@ GPU_PROCLUS(at::Tensor data, int k, int l, float a, float b, float min_deviation
                       d_data,
                       n, d, k);
 
-    // remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
-    //                 d_D,
-    //                 d_delta,
-    //                 d_M_best,
-    //                 d_data,
-    //                 n, d, k);
+    remove_outliers(d_C_result, d_C_best, d_C_sizes_best,
+                    d_D,
+                    d_delta,
+                    d_M_best,
+                    d_data,
+                    n, d, k);
 
     // building result
     std::vector <at::Tensor> r;
