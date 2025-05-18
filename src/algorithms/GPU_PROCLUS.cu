@@ -312,7 +312,7 @@ void gpu_find_dimensions_kernel_compute_D(bool *d_D, float *d_Z, int k, int d, i
     for (int _ = 0; _ < 2; _++) {
 
         for (int i = threadIdx.x; i < k; i += blockDim.x) {
-            min_values[i] = 1000000.;//todo not nice
+            min_values[i] = 1e30;//todo not nice
             i_was_firsts[i] = 1;
         }
         __syncthreads();
