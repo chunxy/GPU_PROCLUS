@@ -64,7 +64,7 @@ for k in ks:
         print("k:", k, "l:", l)
         t0 = time.time()
         try:
-            rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds, debug)
+            rs = PROCLUS(X, k, l, a, b, min_deviation, termination_rounds)
         except Exception as e:
             print("\nFloating point exception occurred at:")
             print("----------------------------------------")
